@@ -1,99 +1,140 @@
 <!DOCTYPE html>
-<html>
+<html lang="en-US">
 <head>
-    <meta charset="utf-8">
-    <title>AR Калькулятор систем счисления</title>
-    <!-- Библиотеки AR.js -->
-    <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
-    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
-	<script type="text/javascript" src="calcul.js"></script>
-    <style>
-        body { margin: 0; overflow: hidden; }
-        .info {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            background: rgba(255, 255, 255, 0.8);
-            padding: 10px;
-            font-family: Arial, sans-serif;
-            z-index: 100;
-            border-radius: 5px;
-        }
-        .status {
-            position: absolute;
-            bottom: 10px;
-            left: 10px;
-            color: red;
-            font-family: Arial, sans-serif;
-            z-index: 100;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Jekyll SEO tag -->
+  <title>T_Grid20Calc</title>
+  <meta name="generator" content="Jekyll v3.10.0" />
+  <link rel="canonical" href="https://gridasowa75-hub.github.io/T_Grid20Calc/" />
+  <meta property="og:url" content="https://gridasowa75-hub.github.io/T_Grid20Calc/" />
+
+  <link rel="stylesheet" href="/T_Grid20Calc/assets/css/style.css?v=572ecf13d51a95d93ebe71e0787d81204e7e968f">
+
+  <!-- Стили калькулятора -->
+  <style>
+    .calculator-container {
+      max-width: 300px;
+      margin: 20px auto;
+      padding: 20px;
+      background: #f0f0f0;
+      border-radius: 10px;
+    }
+    .display {
+      height: 60px;
+      font-size: 24px;
+      text-align: right;
+      padding: 10px;
+      background: white;
+      margin-bottom: 10px;
+      border-radius: 5px;
+    }
+    .btn {
+      width: 60px;
+      height: 60px;
+      margin: 5px;
+      font-size: 18px;
+      cursor: pointer;
+    }
+  </style>
 </head>
 <body>
-    <div class="info">
-        <h3>AR Калькулятор систем счисления</h3>
-        <p>Наведите камеру на карточку с числом</p>
+  <div class="container-lg px-3 my-5 markdown-body">
+    <h1 id="t_grid20calc">T_Grid20Calc</h1>
+
+    <!-- Ваш калькулятор -->
+    <div class="calculator-container">
+      <div class="display">0</div>
+      <div class="buttons">
+        <button class="btn" onclick="appendNumber('7')">7</button>
+        <button class="btn" onclick="appendNumber('8')">8</button>
+        <button class="btn" onclick="appendNumber('9')">9</button>
+        <button class="btn" onclick="setOperation('/')">/</button>
+
+        <button class="btn" onclick="appendNumber('4')">4</button>
+        <button class="btn" onclick="appendNumber('5')">5</button>
+        <button class="btn" onclick="appendNumber('6')">6</button>
+        <button class="btn" onclick="setOperation('*')">*</button>
+
+        <button class="btn" onclick="appendNumber('1')">1</button>
+        <button class="btn" onclick="appendNumber('2')">2</button>
+        <button class="btn" onclick="appendNumber('3')">3</button>
+        <button class="btn" onclick="setOperation('-')">-</button>
+
+        <button class="btn" style="width: 130px;" onclick="appendNumber('0')">0</button>
+        <button class="btn" onclick="calculate()">=</button>
+        <button class="btn" onclick="clearDisplay()">C</button>
+      </div>
     </div>
-    <div class="status" id="status">Ожидание маркера...</div>
+  </div>
 
-    <a-scene embedded arjs="sourceType: webcam;">
-        <!-- Маркер для двоичного числа 1011 -->
-        <a-marker preset="custom" type="pattern" url="markers/marker1011.patt" id="marker-1011">
-            <a-entity id="result-text-1011"
-                text="
-                    value: ;
-                    color: black;
-                    align: center;
-                    width: 6"
-                position="0 1.2 0"
-            ></a-entity>
-            <!-- Визуализация разрядов -->
-            <a-sphere position="-0.6 0.5 0" radius="0.2" color="#FF5733"></a-sphere>
-            <a-sphere position="-0.2 0.5 0" radius="0.2" color="#33FF57"></a-sphere>
-            <a-sphere position="0.2 0.5 0" radius="0.2" color="#3357FF"></a-sphere>
-            <a-sphere position="0.6 0.5 0" radius="0.2" color="#F3FF33"></a-sphere>
-        </a-marker>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/anchor-js/4.1.0/anchor.min.js" integrity="sha256-lZaRhKri35AyJSypXXs4o6OPFTbTmUoltBbDCbdzegg=" crossorigin="anonymous"></script>
+  <script>anchors.add();</script>
 
-        <!-- Маркер для шестнадцатеричного числа A3 -->
-        <a-marker preset="custom" type="pattern" url="markers/markerA3.patt" id="marker-A3">
-            <a-entity id="result-text-A3"
-                text="
-                    value: ;
-                    color: black;
-                    align: center;
-                    width: 6"
-                position="0 1.2 0"
-            ></a-entity>
-        </a-marker>
+  <!-- JavaScript калькулятора -->
+  <script>
+    let currentInput = '0';
+    let previousInput = '';
+    let operation = null;
 
-        <!-- Камера -->
-        <a-entity camera></a-entity>
-    </a-scene>
+    function updateDisplay() {
+      document.querySelector('.display').textContent = currentInput;
+    }
 
-    <script>
-        // Обработчики событий для маркеров
-        document.addEventListener('markerFound', function(event) {
-            const markerId = event.target.id;
-            let resultText;
+    function appendNumber(number) {
+      if (currentInput === '0') {
+        currentInput = number;
+      } else {
+        currentInput += number;
+      }
+      updateDisplay();
+    }
 
-            if (markerId === 'marker-1011') {
-                resultText = convertBinaryToDecimal('1011');
-                document.querySelector('#result-text-1011').setAttribute('text', 'value', resultText);
-            } else if (markerId === 'marker-A3') {
-                resultText = convertHexToDecimal('A3');
-                document.querySelector('#result-text-A3').setAttribute('text', 'value', resultText);
-            }
+    function setOperation(op) {
+      previousInput = currentInput;
+      currentInput = '0';
+      operation = op;
+    }
 
-            document.getElementById('status').textContent = `Распознан маркер: ${markerId}`;
-        });
+    function calculate() {
+      let result;
+      const prev = parseFloat(previousInput);
+      const current = parseFloat(currentInput);
 
-        document.addEventListener('markerLost', function() {
-            document.getElementById('status').textContent = 'Ожидание маркера...';
-        });
-    </script>
+      switch (operation) {
+        case '+':
+          result = prev + current;
+          break;
+        case '-':
+          result = prev - current;
+          break;
+        case '*':
+          result = prev * current;
+          break;
+        case '/':
+          result = prev / current;
+          break;
+        default:
+          return;
+      }
 
-    <!-- Подключаем JavaScript с функциями -->
-    <script type="text/javascript" src="calcul.js"></script>
+      currentInput = result.toString();
+      operation = null;
+      updateDisplay();
+    }
+
+    function clearDisplay() {
+      currentInput = '0';
+      previousInput = '';
+      operation = null;
+      updateDisplay();
+    }
+
+    // Инициализация
+    updateDisplay();
+  </script>
 </body>
 </html>
 
