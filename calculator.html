@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>AR Калькулятор систем счисления</title>
+    <!-- Библиотеки AR.js -->
+    <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+	<script type="text/javascript" src="calcul.js"></script>
+    <style>
+        body { margin: 0; overflow: hidden; }
+        .info {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 10px;
+            font-family: Arial, sans-serif;
+            z-index: 100;
+            border-radius: 5px;
+        }
+        .status {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            color: red;
+            font-family: Arial, sans-serif;
+            z-index: 100;
+        }
+    </style>
+</head>
+<body>
+    <div class="info">
+        <h3>AR Калькулятор систем счисления</h3>
+        <p>Наведите камеру на карточку с числом</p>
+    </div>
+    <div class="status" id="status">Ожидание маркера...</div>
+
+    <a-scene embedded arjs="sourceType: webcam;">
+        <!-- Маркер для двоичного числа 1011 -->
+        <a-marker preset="custom" type="pattern" url="markers/marker1011.patt" id="marker-1011">
+            <a-entity id="result-text-1011"
+                text="
+                    value: ;
+                    color: black;
+                    align: center;
+                    width: 6"
+                position="0 1.2 0"
+            ></a-entity>
+            <!-- Визуализация разрядов -->
+            <a-sphere position="-0.6 0.5 0" radius="0.2" color="#FF5733"></a-sphere>
+            <a-sphere position="-0.2 0.5 0" radius="0.2" color="#33FF57"></a-sphere>
+            <a-sphere position="0.2 0.5 0" radius="0.2" color="#3357FF"></a-sphere>
+            <a-sphere position="0.6 0.5 0" radius="0.2" color="#F3FF33"></a-sphere>
+        </a-marker>
+
+        <!-- Маркер для шестнадцатеричного числа A3 -->
+        <a-marker preset="custom" type="pattern" url="markers/markerA3.patt" id="marker-A3">
+            <a-entity id="result-text-A3"
+                text="
+                    value: ;
+                    color: black;
+                    align: center;
+                    width: 6"
+                position="0 1.2 0"
+            ></a-entity>
+        </a-marker>
+
+        <!-- Камера -->
+        <a-entity camera></a-entity>
+    </a-scene>
+
+    <script>
+        // Обработчики событий для маркеров
+        document.addEventListener('markerFound', function(event) {
+            const markerId = event.target.id;
+            let resultText;
+
+            if (markerId === 'marker-1011') {
+                resultText = convertBinaryToDecimal('1011');
+                document.querySelector('#result-text-1011').setAttribute('text', 'value', resultText);
+            } else if (markerId === 'marker-A3') {
+                resultText = convertHexToDecimal('A3');
+                document.querySelector('#result-text-A3').setAttribute('text', 'value', resultText);
+            }
+
+            document.getElementById('status').textContent = `Распознан маркер: ${markerId}`;
+        });
+
+        document.addEventListener('markerLost', function() {
+            document.getElementById('status').textContent = 'Ожидание маркера...';
+        });
+    </script>
+
+    <!-- Подключаем JavaScript с функциями -->
+    <script type="text/javascript" src="calcul.js"></script>
+</body>
+</html>
+
